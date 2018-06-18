@@ -7,23 +7,26 @@ from socket import *
 import threading
 import os
 
+
+TRACKER_BROADCAST_PORT = 8053
+
+DESKTOP_IP          = '192.168.1.133'
+DESKTOP_LISTEN_PORT = 8059
+
 class Server(asyncore.dispatcher_with_send): 
     def __init__(self):
         asyncore.dispatcher.__init__(self)
         self.create_socket(AF_INET, SOCK_DGRAM)
-        self.bind(('192.168.1.133', 8052))
+        self.bind((DESKTOP_IP, DESKTOP_LISTEN_PORT))
         self.buffer = ''
         self.recvData = ''
 
     def handle_close(self):
-
-
-
         self.close()
 
     def handle_read(self):
         try: 
-            print (self.recv(8052))
+            print (self.recv(8192)) #8192 is buffer size, not port
             # self.buffer ='a'
         except e:
             print(e)
@@ -47,7 +50,7 @@ def main():
     cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
-    server_address = ('localhost', 8053) # BROADCASTING ON PORT 8053
+    server_address = ('255.255.255.255', TRACKER_BROADCAST_PORT) 
 
     v = triad_openvr.triad_openvr()
     v.print_discovered_objects()
@@ -56,13 +59,13 @@ def main():
         # interval = 1/50
         interval = 1/250
     elif len(sys.argv) == 2:
-        interval = 1/float(sys.argv[0])
+        interval = 1/float(sys.argv[1])
     else:
         print("Invalid number of arguments")
         interval = False
         
     if interval:
-        print("hi")
+        print("hi") 
         while(True):
             start = time.time()
             txt = ""
@@ -72,6 +75,7 @@ def main():
             # strData = str(data[4])
             # strData =  strData[:strData.find(".")]
             print(strData)
+            
             byteData = bytes(strData, "utf-8")
             cs.sendto(byteData , server_address)
             
@@ -89,7 +93,8 @@ if __name__ == '__main__':
         print("Stopping tracking!")
         sys.exit(0)
     except Exception as e:
-        if(e == "tracker_1"):
+        print(str(e))
+        if(str(e) == 'tracker_1'):
             print("Tracker is not being tracked!")
         else:
             print("other exception:", e)
