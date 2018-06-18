@@ -30,7 +30,7 @@ class Server(asyncore.dispatcher_with_send):
 
     def handle_write(self):
         if self.buffer != '':
-            sent = self.sendto(self.buffer,('192.168.1.154',8051))
+            sent = self.sendto(self.buffer,('192.168.1.154',8054)) ## RECEIVING ON PORT 8054
             self.buffer = self.buffer[sent:]
 
 
@@ -47,7 +47,7 @@ def main():
     cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
-    server_address = ('255.255.255.255', 8051)
+    server_address = ('localhost', 8053) # BROADCASTING ON PORT 8053
 
     v = triad_openvr.triad_openvr()
     v.print_discovered_objects()
@@ -89,6 +89,9 @@ if __name__ == '__main__':
         print("Stopping tracking!")
         sys.exit(0)
     except Exception as e:
-        print("other exception:", e)
+        if(e == "tracker_1"):
+            print("Tracker is not being tracked!")
+        else:
+            print("other exception:", e)
 
 
